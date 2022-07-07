@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sleep 1 && curl -s https://raw.githubusercontent.com/cryptology-nodes/main/main/logo.sh |  bash && sleep 2
-
 exists()
 {
   command -v "$1" >/dev/null 2>&1
@@ -11,6 +9,9 @@ if exists curl; then
 else
   sudo apt update && sudo apt install curl -y < "/dev/null"
 fi
+
+sleep 1 && curl -s https://raw.githubusercontent.com/cryptology-nodes/main/main/logo.sh |  bash && sleep 2
+
 bash_profile=$HOME/.bash_profile
 if [ -f "$bash_profile" ]; then
     . $HOME/.bash_profile
@@ -22,8 +23,8 @@ echo -e '\n\e[42mInstall Rust\e[0m\n' && sleep 1
 sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
 source $HOME/.cargo/env
 
-mkdir -p /var/sui/db
 rm -rf /var/sui/db /var/sui/genesis.blob
+mkdir -p /var/sui/db
 cd $HOME
 git clone https://github.com/MystenLabs/sui.git
 cd sui
@@ -36,6 +37,7 @@ wget -O /var/sui/genesis.blob https://github.com/MystenLabs/sui-genesis/raw/main
 sed -i.bak "s/db-path:.*/db-path: \"\/var\/sui\/db\"/ ; s/genesis-file-location:.*/genesis-file-location: \"\/var\/sui\/genesis.blob\"/" /var/sui/fullnode.yaml
 cargo build --release -p sui-node
 mv ~/sui/target/release/sui-node /usr/local/bin/
+sed -i.bak 's/127.0.0.1/0.0.0.0/' /var/sui/fullnode.yaml
 
 echo "[Unit]
 Description=Sui Node
